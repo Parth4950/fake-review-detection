@@ -4,6 +4,15 @@ import streamlit as st
 import pandas as pd
 import pickle
 import numpy as np
+import logging
+import warnings
+
+# Suppress warnings and logs
+warnings.filterwarnings('ignore')
+logging.getLogger('urllib3').setLevel(logging.CRITICAL)
+logging.getLogger('requests').setLevel(logging.CRITICAL)
+logging.getLogger('streamlit').setLevel(logging.ERROR)
+
 from sklearn.feature_extraction.text import TfidfVectorizer
 from sklearn.model_selection import train_test_split
 from sklearn.ensemble import RandomForestClassifier

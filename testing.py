@@ -10,6 +10,15 @@ import numpy as np
 from scipy.sparse import hstack
 from textblob import TextBlob
 import re
+import logging
+import warnings
+
+# Suppress warnings and logs
+warnings.filterwarnings('ignore')
+logging.getLogger('urllib3').setLevel(logging.CRITICAL)
+logging.getLogger('requests').setLevel(logging.CRITICAL)
+logging.getLogger('streamlit').setLevel(logging.ERROR)
+plt.set_loglevel('ERROR')  # Suppress matplotlib warnings
 
 # Define the preprocessing function for text data
 from clean_data import clean_text
@@ -83,8 +92,12 @@ def test_model():
             loaded_model = pickle.load(open(model_file, 'rb'))
             vectorizer = pickle.load(open(vectorizer_file, 'rb'))
         st.success("Model and vectorizer loaded successfully!")
-    except Exception as e:
-        st.error(f"Error loading model: {str(e)}")
+    except FileNotFoundError:
+        st.error("❌ Model files not found. Please train a model first.")
+        return
+    except Exception:
+        st.error("❌ Error loading model. The model file might be corrupted or incompatible.")
+        st.info("💡 Please try retraining the model or use a different model file.")
         return
     
     # Check for test data
@@ -100,8 +113,8 @@ def test_model():
             try:
                 df_unlabeled = pd.read_csv(uploaded_file)
                 st.success(f"✅ Loaded: {uploaded_file.name}")
-            except Exception as e:
-                st.error(f"❌ Error loading file: {str(e)}")
+            except Exception:
+                st.error("❌ Error loading file. Please ensure the file is a valid CSV format.")
                 return
         else:
             if os.path.exists(test_data_path):
@@ -215,11 +228,12 @@ def test_model():
                 df_unlabeled['prediction_confidence'] = np.max(predicted_probs, axis=1)
             except:
                 df_unlabeled['prediction_confidence'] = None
-        except Exception as e:
-            st.error(f"❌ Error making predictions: {str(e)}")
-            st.info("💡 The model might be incompatible. Try retraining with a different model.")
-            import traceback
-            st.code(traceback.format_exc())
+        except Exception:
+            st.error("❌ Error making predictions.")
+            st.info("💡 The model might be incompatible with the data format. Please try:")
+            st.info("   • Retraining the model with a compatible algorithm")
+            st.info("   • Checking that the test data has the correct format")
+            st.info("   • Ensuring the model and vectorizer files match")
             return
     
     # Add predicted labels

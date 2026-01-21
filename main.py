@@ -1,5 +1,15 @@
 import streamlit as st
 import os
+import logging
+import warnings
+
+# Suppress all warnings and unnecessary logs
+warnings.filterwarnings('ignore')
+logging.getLogger('urllib3').setLevel(logging.CRITICAL)
+logging.getLogger('requests').setLevel(logging.CRITICAL)
+logging.getLogger('streamlit').setLevel(logging.ERROR)
+os.environ['TF_CPP_MIN_LOG_LEVEL'] = '3'  # Suppress TensorFlow logs if present
+
 from home_page import home_page
 from training import training
 from testing import test_model
